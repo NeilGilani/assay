@@ -1,0 +1,143 @@
+{
+  "file": "detector.onnx",
+  "sha256": "e618207237025882956e12ea1091ed5e0a04533f3d0baf5433660a459a15f7cd",
+  "bytes": 39337935,
+  "source_weights": "yoloe-26s-seg.pt",
+  "exported": "2026-10-07T06:05:24+00:00",
+  "input": {
+    "size": 640,
+    "layout": "NCHW",
+    "channels": "RGB",
+    "scale": "0-1",
+    "letterbox_fill": 114
+  },
+  "output": {
+    "shape": [
+      1,
+      65,
+      8400
+    ],
+    "layout": "[1, 4 + classes + extra, anchors]; rows 0-3 are cx, cy, w, h in input pixels",
+    "box_rows": 4,
+    "extra_rows": 32
+  },
+  "classes": [
+    {
+      "prompt": "person",
+      "id": "person"
+    },
+    {
+      "prompt": "wheelchair",
+      "id": "wheelchair"
+    },
+    {
+      "prompt": "exit sign",
+      "id": "exit_sign"
+    },
+    {
+      "prompt": "emergency exit sign",
+      "id": "exit_sign"
+    },
+    {
+      "prompt": "door",
+      "id": "door"
+    },
+    {
+      "prompt": "staircase",
+      "id": "stairs"
+    },
+    {
+      "prompt": "elevator",
+      "id": "elevator"
+    },
+    {
+      "prompt": "window",
+      "id": "window"
+    },
+    {
+      "prompt": "fire",
+      "id": "fire"
+    },
+    {
+      "prompt": "flame",
+      "id": "fire"
+    },
+    {
+      "prompt": "smoke",
+      "id": "smoke"
+    },
+    {
+      "prompt": "debris",
+      "id": "debris"
+    },
+    {
+      "prompt": "rubble",
+      "id": "debris"
+    },
+    {
+      "prompt": "flood water",
+      "id": "water"
+    },
+    {
+      "prompt": "puddle",
+      "id": "water"
+    },
+    {
+      "prompt": "electrical panel",
+      "id": "electrical_panel"
+    },
+    {
+      "prompt": "fuse box",
+      "id": "electrical_panel"
+    },
+    {
+      "prompt": "exposed wires",
+      "id": "exposed_wires"
+    },
+    {
+      "prompt": "hanging cables",
+      "id": "exposed_wires"
+    },
+    {
+      "prompt": "broken glass",
+      "id": "broken_glass"
+    },
+    {
+      "prompt": "collapsed ceiling",
+      "id": "structural_damage"
+    },
+    {
+      "prompt": "cracked wall",
+      "id": "structural_damage"
+    },
+    {
+      "prompt": "gas cylinder",
+      "id": "gas_cylinder"
+    },
+    {
+      "prompt": "fire extinguisher",
+      "id": "extinguisher"
+    },
+    {
+      "prompt": "first aid kit",
+      "id": "first_aid"
+    },
+    {
+      "prompt": "AED defibrillator",
+      "id": "aed"
+    },
+    {
+      "prompt": "fire alarm",
+      "id": "fire_alarm"
+    },
+    {
+      "prompt": "fire hose",
+      "id": "fire_hose"
+    },
+    {
+      "prompt": "sign",
+      "id": "sign"
+    }
+  ],
+  "license": "Weights derive from Ultralytics YOLOE (AGPL-3.0)."
+}

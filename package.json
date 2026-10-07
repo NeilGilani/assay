@@ -1,0 +1,25 @@
+{
+  "name": "field",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local AI for places where the internet can't be trusted. A phone camera becomes an offline situation model for emergencies.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "postinstall": "node scripts/vendor.mjs",
+    "vendor": "node scripts/vendor.mjs",
+    "start": "node scripts/serve.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "test:e2e": "node --test e2e/*.e2e.mjs",
+    "build": "node scripts/vendor.mjs && node scripts/build-manifest.mjs"
+  },
+  "dependencies": {
+    "onnxruntime-web": "1.30.0"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

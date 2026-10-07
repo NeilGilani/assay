@@ -1,0 +1,7 @@
+# Only for rebuilding or measuring the detector. The app itself needs none of this.
+ultralytics>=8.4.0
+onnx
+onnxslim
+onnxruntime
+pillow
+numpy

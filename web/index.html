@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!--
+      The policy that makes "nothing leaves this device" a fact the browser
+      enforces rather than a promise: every connection is restricted to this
+      origin, which after install is the on-device cache. The same policy is
+      sent as a header (scripts/serve.mjs, web/_headers, sw.js) so it also
+      binds the detector worker.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; connect-src 'self' blob: data:; img-src 'self' blob: data:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <meta name="theme-color" content="#0A0B0D" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="description" content="FIELD: on-device visual intelligence for emergencies. Works with no internet." />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <link rel="stylesheet" href="app.css" />
+    <title>FIELD</title>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-row">
+        <div class="brand"><span class="mark" aria-hidden="true"></span>FIELD</div>
+        <button class="proof" id="proof" aria-expanded="false" aria-controls="proof-panel" title="What is running where">
+          <span class="pill" id="pill-net"><i></i><b>Checking</b></span>
+          <span class="pill" id="pill-field"><i></i><b>Loading</b></span>
+          <span class="pill" id="pill-sent"><i></i><b>0 sent</b></span>
+        </button>
+      </div>
+      <section class="proof-panel" id="proof-panel" hidden aria-label="Where FIELD runs">
+        <dl>
+          <div><dt>Network</dt><dd id="pp-net">-</dd></div>
+          <div><dt>Cloud AI</dt><dd id="pp-cloud">-</dd></div>
+          <div><dt>FIELD</dt><dd id="pp-field">-</dd></div>
+          <div><dt>Sent off this device</dt><dd id="pp-sent">-</dd></div>
+          <div><dt>Policy</dt><dd id="pp-policy">connect-src 'self': the browser refuses any other destination.</dd></div>
+          <div><dt>Offline copy</dt><dd id="pp-offline">-</dd></div>
+        </dl>
+      </section>
+    </header>
+
+    <main class="layout">
+      <section class="stage" aria-label="Camera">
+        <div class="viewport" id="viewport">
+          <video id="video" playsinline muted></video>
+          <canvas id="sim" hidden></canvas>
+          <canvas id="overlay"></canvas>
+          <div class="hud">
+            <span id="hud-heading">-</span>
+            <span id="hud-rate"></span>
+          </div>
+          <div class="sim-label" id="sim-label" hidden>Simulated: scripted detections, not a camera</div>
+
+          <div class="start" id="start">
+            <h1>Point. Scan. Ask.<span>Works with the internet off.</span></h1>
+            <p>FIELD builds a map of exits, hazards, people and equipment from your camera, on this device, and answers from what it has actually seen.</p>
+            <div class="actions">
+              <button class="btn primary" id="btn-camera">Start camera</button>
+              <button class="btn" id="btn-sim">Simulated building</button>
+              <label class="btn ghost" id="btn-photo">Analyse a photo<input type="file" id="photo" accept="image/*" hidden /></label>
+            </div>
+            <p class="small" id="start-status">Loading the on-device model...</p>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="btn small" id="btn-source">Change source</button>
+          <button class="btn small" id="btn-sim-end" hidden>Skip to end</button>
+          <button class="btn small" id="btn-scan" aria-pressed="true" disabled>Pause scan</button>
+          <button class="btn small" id="btn-zone">New area</button>
+          <label class="field-select">Incident
+            <select id="incident">
+              <option value="unknown">Unknown</option>
+              <option value="fire">Fire</option>
+              <option value="earthquake">Earthquake</option>
+              <option value="flood">Flood</option>
+              <option value="outage">Power outage</option>
+            </select>
+          </label>
+          <label class="field-select" id="heading-mode-wrap">Direction
+            <select id="heading-mode">
+              <option value="auto">Compass</option>
+              <option value="manual">Manual</option>
+              <option value="relative">Relative to view</option>
+            </select>
+          </label>
+          <div class="manual-heading" id="manual-heading" hidden>
+            <button class="btn small" data-turn="-15" aria-label="Turn left 15 degrees">&#8630; 15&deg;</button>
+            <output id="manual-value">0&deg;</output>
+            <button class="btn small" data-turn="15" aria-label="Turn right 15 degrees">15&deg; &#8631;</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="ask" aria-label="Ask">
+        <div class="quick" id="quick">
+          <button data-q="Which exit is safest?">Safest exit</button>
+          <button data-q="What hazards are here?">Hazards</button>
+          <button data-q="Is anyone here who needs help?">People</button>
+          <button data-q="Where is the nearest fire extinguisher?">Extinguisher</button>
+          <button data-q="What haven't I checked?">Unchecked</button>
+          <button data-q="Give me a sitrep.">Sitrep</button>
+        </div>
+        <form class="askbar" id="askform" autocomplete="off">
+          <input id="question" type="text" placeholder="Ask about what you've scanned" aria-label="Question" enterkeyhint="send" />
+          <button class="btn primary" type="submit">Ask</button>
+        </form>
+        <article class="answer" id="answer" aria-live="polite">
+          <p class="headline">Scan the space, then ask.</p>
+          <ul class="lines"></ul>
+          <footer>
+            <span class="conf" id="answer-conf"></span>
+            <button class="btn small ghost" id="btn-speak" title="Read aloud with an on-device voice">Speak</button>
+          </footer>
+        </article>
+      </section>
+
+      <section class="mapcard" aria-label="Map">
+        <header>
+          <h2 id="map-title">Area</h2>
+          <span class="legend"><i class="lg exit"></i>exit <i class="lg haz"></i>hazard <i class="lg ppl"></i>person <i class="lg res"></i>equipment</span>
+        </header>
+        <canvas id="map" aria-label="Map of the current area, you at the centre"></canvas>
+        <p class="map-note" id="map-note"></p>
+        <div class="building" id="building" aria-label="Areas visited"></div>
+      </section>
+
+      <section class="seen" aria-label="What FIELD has seen">
+        <header>
+          <h2>Seen in this area</h2>
+          <button class="btn small ghost" id="btn-add">+ Add what you see</button>
+        </header>
+        <div class="add" id="add" hidden>
+          <select id="add-kind" aria-label="What"></select>
+          <select id="add-range" aria-label="How far">
+            <option value="">range unknown</option>
+            <option value="2">near (about 2 m)</option>
+            <option value="5">mid (about 5 m)</option>
+            <option value="10">far (about 10 m)</option>
+          </select>
+          <button class="btn small primary" id="add-go">Add where I'm pointing</button>
+        </div>
+        <div id="entities" class="entities"></div>
+      </section>
+
+      <section class="tools" aria-label="Report">
+        <button class="btn small" id="btn-report">Handoff report</button>
+        <button class="btn small ghost" id="btn-reset">Clear everything</button>
+        <pre id="report" hidden></pre>
+      </section>
+    </main>
+
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>

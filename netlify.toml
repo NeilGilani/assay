@@ -1,0 +1,6 @@
+# One-command deploy to an HTTPS host, which is what a phone needs for the
+# camera. Open the site once on the phone while online; after that it runs
+# with the radio off. Headers (cross-origin isolation, CSP) are in web/_headers.
+[build]
+  command = "npm ci && npm run build"
+  publish = "web"
